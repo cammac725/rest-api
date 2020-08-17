@@ -1,38 +1,22 @@
 const express = require('express');
+const bodyParser = require('body-parser')
+
+const routes = require('./routes/main');
+const passwordRoutes = require('./routes/password')
+
 const app = express();
-const port = 3000;
 
-app.get('/', (req, res) => {
-  res.send("Got it, man!");
+const port = process.env.PORT || 5000;
+app.listen(port, () => {
+  console.log(`server is running on port: ${port}`)
 });
 
-app.get('/status', (req, res) => { 
-  res.status(200).json({ message: 'Check!', status: 200});
-});
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 
-app.post('/signup', (req, res) => {
-  res.status(200).json({ message: 'Posted!', status: 200 });
-});
-
-app.post('/login', (req, res) => {
-  res.status(200).json({ message: 'Posted!', status: 200 });
-});
-
-app.post('/logout', (req, res) => {
-  res.status(200).json({ message: 'Posted!', status: 200 });
-});
-
-app.post('/token', (req, res) => {
-  res.status(200).json({ message: 'Posted!', status: 200 });
-});
-
-app.post('/forgot-pw', (req, res) => {
-  res.status(200).json({ message: 'Posted!', status: 200 });
-});
-
-app.post('/reset-pw', (req, res) => {
-  res.status(200).json({ message: 'Posted!', status: 200 });
-});
+// setup routes
+app.use('/', routes);
+app.use('/', passwordRoutes);
 
 // catch all other routes
 app.use((req, res) => {
@@ -43,10 +27,4 @@ app.use((req, res) => {
 app.use((err, req, res, next) => {
   console.log(err);
   res.status(err.status || 500).json({ err: err.message, status: 500 });
-});
-
-
-
-app.listen(port, () => {
-  console.log(`server is running on port: ${port}`)
 });
