@@ -1,4 +1,6 @@
 const express = require('express');
+const passport = require('passport');
+
 const router = express.Router();
 
 router.get("/", (req, res) => {
@@ -9,12 +11,11 @@ router.get("/status", (req, res) => {
   res.status(200).json({ message: "Check!", status: 200 });
 });
 
-router.post("/signup", (req, res, next) => {
-  if (!req.body) {
-    res.status(400).json({ message: "Invalid body", status: 400 });
-  } else {
-    res.status(200).json({ message: "Posted!", status: 200 });
-  }
+router.post(
+  "/signup",
+  passport.authenticate('signup', { session: false }),
+  (req, res, next) => {
+  res.status(200).json({ message: "signup successful!", status: 200 });
 });
 
 router.post("/login", (req, res) => {
