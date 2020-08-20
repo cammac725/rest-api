@@ -9,7 +9,7 @@ const passwordRoutes = require('./routes/password')
 
 const app = express();
 
-const port = process.env.PORT || 5000;
+const port = process.env.PORT || 80;
 app.listen(port, () => {
   console.log(`server is running on port: ${port}`)
 });
