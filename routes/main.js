@@ -14,12 +14,12 @@ router.get("/status", (req, res) => {
 router.post(
   "/signup",
   passport.authenticate('signup', { session: false }),
-  (req, res, next) => {
+  async (req, res, next) => {
   res.status(200).json({ message: "signup successful!", status: 200 });
 });
 
-router.post("/login", (req, res, next) => {
-  passport.authenticate("login", (error, user) => {
+router.post("/login", async (req, res, next) => {
+  passport.authenticate("login", async (error, user) => {
     try {
       if(error) return next(error);
       if (!user) return next(new Error('email and password are required'));
