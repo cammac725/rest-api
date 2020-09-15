@@ -59,7 +59,7 @@ router.post("/forgot-pw", async (req, res) => {
     subject: 'Monster Morg Password Reset',
     context: {
       name: 'joe',
-      url: `http://localhost:${process.env.PORT || 3000}`
+      url: `http://localhost:${process.env.PORT || 3000}?token=${token}`
     }
   }
   await smtpTransport.sendMail(emailOptions);
@@ -73,30 +73,48 @@ router.post("/forgot-pw", async (req, res) => {
 });
 
 router.post("/reset-pw", async (req, res) => {
-  if (!req.body || !req.body.email) {
-    res.status(400).json({ message: "Invalid body", status: 400 });
-  } else {
-    const userEmail = req.body.email;
+  const userEmail = req.body.email;
+  const user = await UserModel.findOne({
+    resetToken: req.body.token,
+    resetTokenExp: { $gt: Date.now()},
+    email: userEmail,
+  });
 
-    // send user password update email
-    const emailOptions = {
-      to: userEmail,
-      from: email,
-      template: 'reset-pw',
-      subject: 'Monster Morg Password Reset Confirmation',
-      context: {
-        name: 'joe',
-      }
-    }
-    await smtpTransport.sendMail(emailOptions);
-
-    res
-      .status(200)
-      .json({
-        message: 'password updated',
-        status: 200,
-      });
+  if (!user) {
+    res.status(400).json({ message: "invalid token", status: 400 });
+    return;
   }
+
+  // ensure password was provided, and matches verified password
+  if (!req.body.password || !req.body.verifiedPassword || req.body.password !== req.body.verifiedPassword) {
+    res.status(400).json({ message: "passwords do not match", status: 400 });
+    return;
+  }
+
+  // update the user model
+  user.password = req.body.password;
+  user.testToken = undefined;
+  user.resetTokenExp = undefined;
+  await user.save();
+
+  // send user password update email
+  const emailOptions = {
+    to: userEmail,
+    from: email,
+    template: 'reset-pw',
+    subject: 'Monster Morg Password Reset Confirmation',
+    context: {
+      name: user.username,
+    }
+  }
+  await smtpTransport.sendMail(emailOptions);
+
+  res
+    .status(200)
+    .json({
+      message: 'password updated',
+      status: 200,
+    });
 });
 
 module.exports = router;
