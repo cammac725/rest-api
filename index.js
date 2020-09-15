@@ -1,12 +1,15 @@
 require('dotenv').config();
+
 const express = require('express');
 const bodyParser = require('body-parser')
 const cors = require('cors');
 const cookieParser = require('cookie-parser');
 const mongoose = require('mongoose');
+const passport = require("passport");
 
 const routes = require('./routes/main');
-const passwordRoutes = require('./routes/password')
+const passwordRoutes = require('./routes/password');
+const secureRoutes = require('./routes/secure');
 
 // setup mongo connection
 const uri = process.env.MONGO_CONNECTION_URL;
@@ -43,6 +46,7 @@ require('./auth/auth');
 // setup routes
 app.use('/', routes);
 app.use('/', passwordRoutes);
+app.use('/', passport.authenticate('jwt', { session: false }), secureRoutes);
 
 // catch all other routes
 app.use((req, res) => {
