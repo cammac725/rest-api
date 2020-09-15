@@ -74,11 +74,16 @@ router.post("/login", async (req, res, next) => {
 });
 
 router.post("/logout", (req, res) => {
-  if (!req.body) {
-    res.status(400).json({ message: "Invalid body", status: 400 });
-  } else {
-    res.status(200).json({ message: "Posted!", status: 200 });
-  }
+  if(req.cookies) {
+    const refreshToken = req.cookies.refreshJwt;
+    if (refreshToken in tokenList) {
+      delete tokenList[refreshToken];
+    }
+    res.clearCookie("jwt");
+    res.clearCookie("refreshJwt");
+  } 
+  res.status(200).json({ message: "Logged out", status: 200 });
+
 });
 
 router.post("/token", (req, res) => {
